@@ -1,12 +1,12 @@
 {
-    "version": "0.7.10",
+    "version": "0.7.13",
     "description": "Fastskill - A fast skill management tool",
     "homepage": "https://github.com/gofastskill/fastskill",
     "license": "MIT",
     "architecture": {
         "64bit": {
-            "url": "https://github.com/gofastskill/fastskill/releases/download/v0.7.10/fastskill-x86_64-pc-windows-msvc.zip",
-            "hash": "d5d8dd7590e5fd9afa3b15b36750ba2de8aedecd4cd37348e4a1242b9fca9d55"
+            "url": "https://github.com/gofastskill/fastskill/releases/download/v0.7.13/fastskill-x86_64-pc-windows-msvc.zip",
+            "hash": "4510299c7d39aff67fa26ec2281c7c7c11eef1683f5bfc2b1ce733dc84b565b1"
         }
     },
     "bin": "fastskill.exe",
@@ -19,4 +19,3 @@
         }
     }
 }
-
