@@ -6,7 +6,7 @@
   "architecture": {
     "64bit": {
       "url": "https://github.com/gofastskill/fastskill/releases/download/v0.9.89/fastskill-x86_64-pc-windows-msvc.zip",
-      "hash": "d2cca866701fd4db6229a4c1544da24c9a9b8cb003d57890d24af91a7aa4af95"
+      "hash": "78e5f717b9b731b60d90861326dec91d438b87b6dbf9149d19af675d1fc3b51f"
     }
   },
   "bin": "fastskill.exe",
