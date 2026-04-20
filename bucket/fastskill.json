@@ -1,12 +1,12 @@
 {
-  "version": "0.9.106",
+  "version": "0.9.107",
   "description": "Fastskill - A fast skill management tool",
   "homepage": "https://github.com/gofastskill/fastskill",
   "license": "Apache-2.0",
   "architecture": {
     "64bit": {
-      "url": "https://github.com/gofastskill/fastskill/releases/download/v0.9.106/fastskill-x86_64-pc-windows-msvc.zip",
-      "hash": "cd2f28450832025656d09d3740e0b124d1e696bebc0f68a2d6f3b7410f9d593f"
+      "url": "https://github.com/gofastskill/fastskill/releases/download/v0.9.107/fastskill-x86_64-pc-windows-msvc.zip",
+      "hash": "13b19602aae9cc549fd1202aa9a0d338d5b3c48d69d9c3093966e28513df5303"
     }
   },
   "bin": "fastskill.exe",
