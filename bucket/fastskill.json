@@ -1,12 +1,12 @@
 {
-  "version": "0.9.208",
+  "version": "0.9.209",
   "description": "FastSkill - package manager and operational toolkit for AI agent skills",
   "homepage": "https://github.com/gofastskill/fastskill",
   "license": "Apache-2.0",
   "architecture": {
     "64bit": {
-      "url": "https://github.com/gofastskill/fastskill/releases/download/v0.9.208/fastskill-x86_64-pc-windows-msvc.zip",
-      "hash": "47a11d764a10d78f9a57e4dfbb19e1d333bfd3331a728adf710fd33710f323dc"
+      "url": "https://github.com/gofastskill/fastskill/releases/download/v0.9.209/fastskill-x86_64-pc-windows-msvc.zip",
+      "hash": "c6fa52e1a4d1945333fcc812d9e3f148a8cf6984dac09b537e79cf58331d1b9b"
     }
   },
   "bin": "fastskill.exe",
