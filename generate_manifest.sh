@@ -5,48 +5,41 @@ set -euo pipefail
 # Usage: ./generate_manifest.sh [--version VERSION]
 
 APP_NAME="fastskill"
-GITHUB_REPO="gofastskill/fastskill"
 MANIFEST_FILE="bucket/${APP_NAME}.json"
 
-# Check dependencies
-check_dependencies() {
-    if ! command -v gh &> /dev/null; then
-        echo "Error: GitHub CLI (gh) is not installed"
-        exit 1
-    fi
+if ! command -v jq &> /dev/null || ! command -v curl &> /dev/null; then
+    echo "Error: jq and curl are required"
+    exit 1
+fi
 
-    if ! gh auth status &> /dev/null; then
-        echo "Error: GitHub CLI (gh) is not authenticated"
-        exit 1
-    fi
-
-    if ! command -v jq &> /dev/null; then
-        echo "Error: jq is not installed"
-        exit 1
-    fi
-}
-
-check_dependencies
+# Everything comes from FastSkill's download site, never from GitHub: the source repository is
+# private. Set DOWNLOAD_BASE to override.
+SITE="${DOWNLOAD_BASE:-https://get.gofastskill.com}"
 
 VERSION="${2:-latest}"
 
-# Get version and release tag
+# "latest" is the stable track: /latest/<os>/<arch> redirects to /v/<version>/<file>.
 if [ "$VERSION" = "latest" ] || [ -z "$VERSION" ]; then
-    RELEASE_TAG=$(gh release view --repo "$GITHUB_REPO" --json tagName -q .tagName)
-    VERSION=$(echo "$RELEASE_TAG" | sed 's/^v//')
+    LOCATION=$(curl -fsS -o /dev/null -w '%{redirect_url}' "$SITE/latest/windows/x64")
+    VERSION=$(printf '%s\n' "$LOCATION" | sed -n 's#^.*/v/\([^/]*\)/.*#\1#p')
+    if [ -z "$VERSION" ]; then
+        echo "Error: could not resolve the latest version from $SITE/latest/windows/x64"
+        exit 1
+    fi
 else
     VERSION=$(echo "$VERSION" | sed 's/^v//')
-    RELEASE_TAG="v$VERSION"
+fi
+RELEASE_TAG="v$VERSION"
+
+if ! CHECKSUMS=$(curl -fsSL "$SITE/v/$VERSION/checksums.txt"); then
+    echo "Error: $SITE has no checksums for $VERSION"
+    exit 1
 fi
 
-# Get release data
-RELEASE_DATA=$(gh api "repos/$GITHUB_REPO/releases/tags/$RELEASE_TAG")
-
-# Both Windows builds. Downloads come from FastSkill's download site, never from GitHub: the
-# source repository is private. Set DOWNLOAD_BASE to override.
-BASE="${DOWNLOAD_BASE:-https://get.gofastskill.com}/v/$VERSION"
+# Both Windows builds.
+BASE="$SITE/v/$VERSION"
 digest_of() {
-    echo "$RELEASE_DATA" | jq -r --arg n "$1" '.assets[] | select(.name == $n) | .digest // empty' | sed 's/sha256://'
+    printf '%s\n' "$CHECKSUMS" | awk -v n="$1" '$2 == n || $2 == "*" n { print $1; exit }'
 }
 X64=fastskill-x86_64-pc-windows-msvc.zip
 ARM64=fastskill-aarch64-pc-windows-msvc.zip
@@ -70,4 +63,4 @@ jq --arg version "$VERSION" \
 echo "✅ Scoop manifest updated: $MANIFEST_FILE"
 echo "Version: $VERSION"
 echo "URL: $WINDOWS_URL"
-echo "Hash: $WINDOWS_HASH"
+echo "Hash: $X64_HASH"
