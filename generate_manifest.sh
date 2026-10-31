@@ -42,32 +42,29 @@ fi
 # Get release data
 RELEASE_DATA=$(gh api "repos/$GITHUB_REPO/releases/tags/$RELEASE_TAG")
 
-# Extract Windows asset URL and hash
-WINDOWS_ASSET=$(echo "$RELEASE_DATA" | jq -r '.assets[] | select(.name | contains("windows")) | select(.name | contains("msvc"))')
-
-if [ -z "$WINDOWS_ASSET" ] || [ "$WINDOWS_ASSET" = "null" ]; then
-    echo "⚠️  Warning: Windows binary not found in release $RELEASE_TAG"
+# Both Windows builds. Downloads come from FastSkill's download site, never from GitHub: the
+# source repository is private. Set DOWNLOAD_BASE to override.
+BASE="${DOWNLOAD_BASE:-https://get.gofastskill.com}/v/$VERSION"
+digest_of() {
+    echo "$RELEASE_DATA" | jq -r --arg n "$1" '.assets[] | select(.name == $n) | .digest // empty' | sed 's/sha256://'
+}
+X64=fastskill-x86_64-pc-windows-msvc.zip
+ARM64=fastskill-aarch64-pc-windows-msvc.zip
+X64_HASH=$(digest_of "$X64")
+ARM64_HASH=$(digest_of "$ARM64")
+if [ -z "$X64_HASH" ]; then
+    echo "⚠️  Warning: $X64 not found in release $RELEASE_TAG"
     echo "Skipping Scoop manifest update"
     exit 0
 fi
+WINDOWS_URL="$BASE/$X64"
 
-WINDOWS_URL=$(echo "$WINDOWS_ASSET" | jq -r '.browser_download_url // empty')
-if [ -z "$WINDOWS_URL" ] || [ "$WINDOWS_URL" = "null" ]; then
-    # Construct URL from release tag
-    WINDOWS_URL="https://github.com/$GITHUB_REPO/releases/download/$RELEASE_TAG/fastskill-x86_64-pc-windows-msvc.zip"
-fi
-
-WINDOWS_HASH=$(echo "$WINDOWS_ASSET" | jq -r '.digest' | sed 's/sha256://')
-if [ -z "$WINDOWS_HASH" ] || [ "$WINDOWS_HASH" = "null" ]; then
-    echo "Error: Could not find SHA256 digest for Windows binary"
-    exit 1
-fi
-
-# Update manifest using jq
 jq --arg version "$VERSION" \
-   --arg url "$WINDOWS_URL" \
-   --arg hash "$WINDOWS_HASH" \
-   '.version = $version | .architecture."64bit".url = $url | .architecture."64bit".hash = $hash' \
+   --arg base "$BASE" --arg x64 "$X64" --arg x64h "$X64_HASH" \
+   --arg arm "$ARM64" --arg armh "$ARM64_HASH" \
+   '.version = $version
+    | .architecture."64bit" = {url: ($base + "/" + $x64), hash: $x64h}
+    | if $armh != "" then .architecture.arm64 = {url: ($base + "/" + $arm), hash: $armh} else del(.architecture.arm64) end' \
    "$MANIFEST_FILE" > "$MANIFEST_FILE.tmp" && mv "$MANIFEST_FILE.tmp" "$MANIFEST_FILE"
 
 echo "✅ Scoop manifest updated: $MANIFEST_FILE"
