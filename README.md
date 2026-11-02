@@ -42,6 +42,10 @@ scoop uninstall fastskill
 scoop bucket rm gofastskill
 ```
 
+## Updates
+
+`bucket/fastskill.json` is generated and committed automatically for each stable release of fastskill. Do not edit it by hand: the next release overwrites it.
+
 ## Learn More
 
 - [FastSkill GitHub](https://github.com/gofastskill)
